@@ -230,7 +230,7 @@ class TransactionService {
       
       return false;
     } catch (error) {
-      if (error?.response?.data?.message) {
+if (error?.response?.data?.message) {
         console.error("Error deleting transaction:", error?.response?.data?.message);
         toast.error(error.response.data.message);
       } else {
@@ -238,7 +238,6 @@ class TransactionService {
         toast.error("Failed to delete transaction");
       }
       return false;
-return false;
     }
   }
 
