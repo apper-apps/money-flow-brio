@@ -267,6 +267,8 @@ const getBillStatus = (bill) => {
         onClose={() => setIsModalOpen(false)}
         onSuccess={handleModalSuccess}
       />
-    </div>
+</div>
   );
 };
+
+export default Bills;
