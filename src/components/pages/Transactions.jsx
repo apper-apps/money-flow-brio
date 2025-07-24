@@ -62,8 +62,8 @@ const Transactions = () => {
     setLoading(prev => ({ ...prev, connecting: false }));
   }, []);
 
-  const { open: openPlaidLink, ready } = usePlaidLink({
-    token: null, // In production, get link_token from your backend
+const { open: openPlaidLink, ready } = usePlaidLink({
+    token: 'mock_link_token', // Mock token for demo - in production, get link_token from your backend
     onSuccess: onPlaidSuccess,
     onExit: onPlaidExit,
     env: 'sandbox', // Use 'production' in production
@@ -73,11 +73,14 @@ const Transactions = () => {
 
   const handleConnectBank = async () => {
     try {
+      setLoading(prev => ({ ...prev, connecting: true }));
       await transactionService.initializePlaid();
       // In a real implementation, you'd create a link_token from your backend here
       openPlaidLink();
     } catch (error) {
+      console.error('Failed to initialize bank connection:', error);
       toast.error('Failed to initialize bank connection');
+      setLoading(prev => ({ ...prev, connecting: false }));
     }
   };
 
