@@ -1,10 +1,26 @@
-import React from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
 import GoalCards from "@/components/organisms/GoalCards";
 import Button from "@/components/atoms/Button";
 import ApperIcon from "@/components/ApperIcon";
+import AddGoalModal from "@/components/organisms/AddGoalModal";
 
 const Goals = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleCreateGoal = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleGoalCreated = (newGoal) => {
+    // Modal will close automatically, GoalCards will refresh on next render
+    console.log('Goal created:', newGoal);
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -13,11 +29,11 @@ const Goals = () => {
           <h1 className="text-3xl font-bold text-slate-900">Savings Goals</h1>
           <p className="text-slate-600 mt-1">Track your progress towards financial milestones</p>
         </div>
-        <Button variant="primary" className="shadow-premium">
+        <Button variant="primary" className="shadow-premium" onClick={handleCreateGoal}>
           <ApperIcon name="Plus" className="h-4 w-4 mr-2" />
           Create Goal
         </Button>
-      </div>
+</div>
 
       {/* Goals Overview */}
       <motion.div
@@ -41,7 +57,7 @@ const Goals = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-primary-600">Total Target</p>
-<p className="text-2xl font-bold text-primary-900">$45,000</p>
+              <p className="text-2xl font-bold text-primary-900">$45,000</p>
             </div>
             <div className="h-12 w-12 bg-primary-500 rounded-lg flex items-center justify-center">
               <ApperIcon name="DollarSign" className="h-6 w-6 text-white" />
@@ -70,6 +86,13 @@ const Goals = () => {
       >
         <GoalCards />
       </motion.div>
+
+      {/* Add Goal Modal */}
+      <AddGoalModal
+        isOpen={isModalOpen}
+        onClose={handleModalClose}
+        onSuccess={handleGoalCreated}
+      />
     </div>
   );
 };
