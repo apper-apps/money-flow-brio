@@ -1,10 +1,17 @@
-import React from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
 import BudgetCards from "@/components/organisms/BudgetCards";
 import Button from "@/components/atoms/Button";
 import ApperIcon from "@/components/ApperIcon";
-
+import AddBudgetModal from "@/components/organisms/AddBudgetModal";
 const Budgets = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const handleModalSuccess = () => {
+    setRefreshKey(prev => prev + 1);
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -13,7 +20,11 @@ const Budgets = () => {
           <h1 className="text-3xl font-bold text-slate-900">Budgets</h1>
           <p className="text-slate-600 mt-1">Monitor your spending against set budgets</p>
         </div>
-        <Button variant="primary" className="shadow-premium">
+        <Button 
+          variant="primary" 
+          className="shadow-premium"
+          onClick={() => setIsModalOpen(true)}
+        >
           <ApperIcon name="Plus" className="h-4 w-4 mr-2" />
           Create Budget
         </Button>
@@ -66,10 +77,17 @@ const Budgets = () => {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
+transition={{ delay: 0.2 }}
       >
-        <BudgetCards />
+        <BudgetCards key={refreshKey} />
       </motion.div>
+
+      {/* Add Budget Modal */}
+      <AddBudgetModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSuccess={handleModalSuccess}
+      />
     </div>
   );
 };
