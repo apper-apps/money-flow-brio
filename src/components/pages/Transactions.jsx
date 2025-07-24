@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useCallback } from "react";
-import { motion } from "framer-motion";
-import { usePlaidLink } from "plaid-link";
-import TransactionList from "@/components/organisms/TransactionList";
-import AddTransactionModal from "@/components/organisms/AddTransactionModal";
+import React, { useState, useEffect, useCallback } from 'react'
+import { motion } from 'framer-motion'
+import { usePlaidLink } from 'react-plaid-link'
+import TransactionList from '@/components/organisms/TransactionList'
+import AddTransactionModal from '@/components/organisms/AddTransactionModal'
 import SearchBar from "@/components/molecules/SearchBar";
 import Button from "@/components/atoms/Button";
 import Select from "@/components/atoms/Select";
