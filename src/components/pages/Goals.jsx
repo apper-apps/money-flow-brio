@@ -41,7 +41,7 @@ const Goals = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-primary-600">Total Target</p>
-              <p className="text-2xl font-bold primary-900">$45,000</p>
+<p className="text-2xl font-bold text-primary-900">$45,000</p>
             </div>
             <div className="h-12 w-12 bg-primary-500 rounded-lg flex items-center justify-center">
               <ApperIcon name="DollarSign" className="h-6 w-6 text-white" />

@@ -1,60 +1,258 @@
-import transactionsData from "@/services/mockData/transactions.json";
+import { toast } from "react-toastify";
 
 class TransactionService {
   constructor() {
-    this.transactions = [...transactionsData];
     this.connectedAccounts = [];
     this.plaidClient = null;
+    
+    // Initialize ApperClient
+    if (typeof window !== 'undefined' && window.ApperSDK) {
+      const { ApperClient } = window.ApperSDK;
+      this.apperClient = new ApperClient({
+        apperProjectId: import.meta.env.VITE_APPER_PROJECT_ID,
+        apperPublicKey: import.meta.env.VITE_APPER_PUBLIC_KEY
+      });
+    }
   }
 
   async getAll() {
-    await this.delay();
-    return [...this.transactions];
+    try {
+      const params = {
+        fields: [
+          { field: { Name: "Name" } },
+          { field: { Name: "Tags" } },
+          { field: { Name: "Owner" } },
+          { field: { Name: "amount" } },
+          { field: { Name: "type" } },
+          { field: { Name: "category" } },
+          { field: { Name: "description" } },
+          { field: { Name: "date" } },
+          { field: { Name: "recurring" } },
+          { field: { Name: "plaid_transaction_id" } },
+          { field: { Name: "account_id" } }
+        ],
+        orderBy: [
+          { fieldName: "date", sorttype: "DESC" }
+        ]
+      };
+
+      const response = await this.apperClient.fetchRecords('transaction', params);
+      
+      if (!response.success) {
+        console.error("Error fetching transactions:", response.message);
+        toast.error(response.message);
+        return [];
+      }
+
+      return response.data || [];
+    } catch (error) {
+      if (error?.response?.data?.message) {
+        console.error("Error fetching transactions:", error?.response?.data?.message);
+        toast.error(error.response.data.message);
+      } else {
+        console.error("Error fetching transactions:", error.message);
+        toast.error("Failed to load transactions");
+      }
+      return [];
+    }
   }
 
   async getById(id) {
-    await this.delay();
-    const transaction = this.transactions.find(t => t.Id === id);
-    if (!transaction) {
-      throw new Error("Transaction not found");
+    try {
+      const params = {
+        fields: [
+          { field: { Name: "Name" } },
+          { field: { Name: "Tags" } },
+          { field: { Name: "Owner" } },
+          { field: { Name: "amount" } },
+          { field: { Name: "type" } },
+          { field: { Name: "category" } },
+          { field: { Name: "description" } },
+          { field: { Name: "date" } },
+          { field: { Name: "recurring" } },
+          { field: { Name: "plaid_transaction_id" } },
+          { field: { Name: "account_id" } }
+        ]
+      };
+
+      const response = await this.apperClient.getRecordById('transaction', id, params);
+      
+      if (!response.success) {
+        console.error(`Error fetching transaction with ID ${id}:`, response.message);
+        toast.error(response.message);
+        return null;
+      }
+
+      return response.data;
+    } catch (error) {
+      if (error?.response?.data?.message) {
+        console.error(`Error fetching transaction with ID ${id}:`, error?.response?.data?.message);
+        toast.error(error.response.data.message);
+      } else {
+        console.error("Error fetching transaction:", error.message);
+        toast.error("Failed to load transaction");
+      }
+      return null;
     }
-    return { ...transaction };
   }
 
   async create(transaction) {
-    await this.delay();
-    const maxId = Math.max(...this.transactions.map(t => t.Id), 0);
-    const newTransaction = {
-      ...transaction,
-      Id: maxId + 1
-    };
-    this.transactions.push(newTransaction);
-    return { ...newTransaction };
+    try {
+      const params = {
+        records: [{
+          Name: transaction.description || '',
+          Tags: transaction.tags || '',
+          amount: parseFloat(transaction.amount),
+          type: transaction.type,
+          category: transaction.category,
+          description: transaction.description,
+          date: transaction.date,
+          recurring: Boolean(transaction.recurring),
+          plaid_transaction_id: transaction.plaid_transaction_id || '',
+          account_id: transaction.account_id || ''
+        }]
+      };
+
+      const response = await this.apperClient.createRecord('transaction', params);
+      
+      if (!response.success) {
+        console.error("Error creating transaction:", response.message);
+        toast.error(response.message);
+        return null;
+      }
+
+      if (response.results) {
+        const successfulRecords = response.results.filter(result => result.success);
+        const failedRecords = response.results.filter(result => !result.success);
+        
+        if (failedRecords.length > 0) {
+          console.error(`Failed to create ${failedRecords.length} transaction records:${JSON.stringify(failedRecords)}`);
+          
+          failedRecords.forEach(record => {
+            record.errors?.forEach(error => {
+              toast.error(`${error.fieldLabel}: ${error.message}`);
+            });
+            if (record.message) toast.error(record.message);
+          });
+        }
+        
+        return successfulRecords.length > 0 ? successfulRecords[0].data : null;
+      }
+      
+      return null;
+    } catch (error) {
+      if (error?.response?.data?.message) {
+        console.error("Error creating transaction:", error?.response?.data?.message);
+        toast.error(error.response.data.message);
+      } else {
+        console.error("Error creating transaction:", error.message);
+        toast.error("Failed to create transaction");
+      }
+      return null;
+    }
   }
 
   async update(id, data) {
-    await this.delay();
-    const index = this.transactions.findIndex(t => t.Id === id);
-    if (index === -1) {
-      throw new Error("Transaction not found");
+    try {
+      const params = {
+        records: [{
+          Id: parseInt(id),
+          Name: data.description || data.Name || '',
+          Tags: data.tags || data.Tags || '',
+          amount: parseFloat(data.amount),
+          type: data.type,
+          category: data.category,
+          description: data.description,
+          date: data.date,
+          recurring: Boolean(data.recurring),
+          plaid_transaction_id: data.plaid_transaction_id || '',
+          account_id: data.account_id || ''
+        }]
+      };
+
+      const response = await this.apperClient.updateRecord('transaction', params);
+      
+      if (!response.success) {
+        console.error("Error updating transaction:", response.message);
+        toast.error(response.message);
+        return null;
+      }
+
+      if (response.results) {
+        const successfulUpdates = response.results.filter(result => result.success);
+        const failedUpdates = response.results.filter(result => !result.success);
+        
+        if (failedUpdates.length > 0) {
+          console.error(`Failed to update ${failedUpdates.length} transaction records:${JSON.stringify(failedUpdates)}`);
+          
+          failedUpdates.forEach(record => {
+            record.errors?.forEach(error => {
+              toast.error(`${error.fieldLabel}: ${error.message}`);
+            });
+            if (record.message) toast.error(record.message);
+          });
+        }
+        
+        return successfulUpdates.length > 0 ? successfulUpdates[0].data : null;
+      }
+      
+      return null;
+    } catch (error) {
+      if (error?.response?.data?.message) {
+        console.error("Error updating transaction:", error?.response?.data?.message);
+        toast.error(error.response.data.message);
+      } else {
+        console.error("Error updating transaction:", error.message);
+        toast.error("Failed to update transaction");
+      }
+      return null;
     }
-    this.transactions[index] = { ...this.transactions[index], ...data };
-    return { ...this.transactions[index] };
   }
 
   async delete(id) {
-    await this.delay();
-    const index = this.transactions.findIndex(t => t.Id === id);
-    if (index === -1) {
-      throw new Error("Transaction not found");
-}
-    this.transactions.splice(index, 1);
-    return true;
+    try {
+      const params = {
+        RecordIds: [parseInt(id)]
+      };
+
+      const response = await this.apperClient.deleteRecord('transaction', params);
+      
+      if (!response.success) {
+        console.error("Error deleting transaction:", response.message);
+        toast.error(response.message);
+        return false;
+      }
+
+      if (response.results) {
+        const successfulDeletions = response.results.filter(result => result.success);
+        const failedDeletions = response.results.filter(result => !result.success);
+        
+        if (failedDeletions.length > 0) {
+          console.error(`Failed to delete ${failedDeletions.length} transaction records:${JSON.stringify(failedDeletions)}`);
+          
+          failedDeletions.forEach(record => {
+            if (record.message) toast.error(record.message);
+          });
+        }
+        
+        return successfulDeletions.length > 0;
+      }
+      
+      return false;
+    } catch (error) {
+      if (error?.response?.data?.message) {
+        console.error("Error deleting transaction:", error?.response?.data?.message);
+        toast.error(error.response.data.message);
+      } else {
+        console.error("Error deleting transaction:", error.message);
+        toast.error("Failed to delete transaction");
+      }
+      return false;
+    }
   }
 
-  // Plaid Integration Methods
+  // Plaid Integration Methods - Preserved for existing functionality
   async initializePlaid() {
-await this.delay();
     try {
       // In a real implementation, this would initialize Plaid with your credentials
       this.plaidClient = {
@@ -68,20 +266,19 @@ await this.delay();
   }
 
   async linkAccount(publicToken, metadata) {
-    await this.delay();
     try {
       // In a real implementation, exchange public token for access token
       const accountId = Date.now().toString();
       const newAccount = {
         Id: this.connectedAccounts.length + 1,
-        accountId,
-        institutionName: metadata.institution?.name || 'Unknown Bank',
-        accountName: metadata.account?.name || 'Checking Account',
-        accountType: metadata.account?.type || 'depository',
-        publicToken,
-        accessToken: `access_token_${accountId}`, // Mock access token
-        connectedAt: new Date().toISOString(),
-        lastSync: null
+        account_id: accountId,
+        institution_name: metadata.institution?.name || 'Unknown Bank',
+        account_name: metadata.account?.name || 'Checking Account',
+        account_type: metadata.account?.type || 'depository',
+        public_token: publicToken,
+        access_token: `access_token_${accountId}`, // Mock access token
+        connected_at: new Date().toISOString(),
+        last_sync: null
       };
       
       this.connectedAccounts.push(newAccount);
@@ -92,7 +289,6 @@ await this.delay();
   }
 
   async syncTransactions(accountId) {
-    await this.delay();
     try {
       const account = this.connectedAccounts.find(acc => acc.Id === accountId);
       if (!account) {
@@ -108,8 +304,8 @@ await this.delay();
           description: 'Coffee Shop Purchase',
           date: new Date().toISOString().split('T')[0],
           recurring: false,
-          plaidTransactionId: `plaid_${Date.now()}_1`,
-          accountId: account.accountId
+          plaid_transaction_id: `plaid_${Date.now()}_1`,
+          account_id: account.account_id
         },
         {
           amount: 45.00,
@@ -118,32 +314,22 @@ await this.delay();
           description: 'Gas Station',
           date: new Date(Date.now() - 86400000).toISOString().split('T')[0],
           recurring: false,
-          plaidTransactionId: `plaid_${Date.now()}_2`,
-          accountId: account.accountId
+          plaid_transaction_id: `plaid_${Date.now()}_2`,
+          account_id: account.account_id
         }
       ];
 
-      // Deduplicate transactions
+      // Create new transactions in database
       const newTransactions = [];
       for (const importedTx of mockImportedTransactions) {
-        const exists = this.transactions.some(tx => 
-          tx.plaidTransactionId === importedTx.plaidTransactionId
-        );
-        
-        if (!exists) {
-          const maxId = Math.max(...this.transactions.map(t => t.Id), 0);
-          const newTransaction = {
-            ...importedTx,
-            Id: maxId + newTransactions.length + 1
-          };
-          newTransactions.push(newTransaction);
+        const created = await this.create(importedTx);
+        if (created) {
+          newTransactions.push(created);
         }
       }
-
-      this.transactions.push(...newTransactions);
       
       // Update last sync time
-      account.lastSync = new Date().toISOString();
+      account.last_sync = new Date().toISOString();
       
       return {
         imported: newTransactions.length,
@@ -156,12 +342,10 @@ await this.delay();
   }
 
   async getConnectedAccounts() {
-    await this.delay();
     return [...this.connectedAccounts];
   }
 
   async disconnectAccount(accountId) {
-    await this.delay();
     try {
       const index = this.connectedAccounts.findIndex(acc => acc.Id === accountId);
       if (index === -1) {
@@ -173,10 +357,6 @@ await this.delay();
     } catch (error) {
       throw new Error('Failed to disconnect account');
     }
-  }
-
-  delay() {
-    return new Promise(resolve => setTimeout(resolve, 300));
   }
 }
 

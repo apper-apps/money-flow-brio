@@ -1,8 +1,8 @@
 import React from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
-import ApperIcon from "@/components/ApperIcon";
 import { cn } from "@/utils/cn";
+import ApperIcon from "@/components/ApperIcon";
 
 const Sidebar = ({ isOpen, onClose }) => {
   const location = useLocation();
@@ -52,21 +52,20 @@ const Sidebar = ({ isOpen, onClose }) => {
           );
         })}
       </nav>
-
-      {/* Footer */}
+{/* Footer */}
       <div className="px-6 py-6 border-t border-slate-200">
         <div className="flex items-center space-x-3">
           <div className="bg-gradient-to-br from-accent-500 to-accent-600 rounded-full p-2">
             <ApperIcon name="User" className="h-4 w-4 text-white" />
           </div>
           <div>
-            <p className="text-sm font-medium text-slate-900">Personal Account</p>
-            <p className="text-xs text-slate-500">Manage your finances</p>
+            <p className="text-sm font-medium text-slate-900">MoneyFlow Account</p>
+            <p className="text-xs text-slate-500">Personal Finance</p>
           </div>
         </div>
       </div>
     </div>
-  );
+);
 
   return (
     <>

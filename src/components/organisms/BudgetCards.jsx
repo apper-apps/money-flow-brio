@@ -22,7 +22,7 @@ const loadBudgets = async () => {
       setLoading(true);
       const [budgetData, transactionData] = await Promise.all([
         budgetService.getAll(),
-        transactionService.getAll()
+transactionService.getAll()
       ]);
       setTransactions(transactionData);
       // Calculate spent amount for each budget

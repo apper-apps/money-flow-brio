@@ -1,28 +1,28 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/atoms/Card";
-import Badge from "@/components/atoms/Badge";
-import Button from "@/components/atoms/Button";
+import { differenceInDays, format, isPast } from "date-fns";
+import { toast } from "react-toastify";
+import { billService } from "@/services/api/billService";
 import ApperIcon from "@/components/ApperIcon";
-import Loading from "@/components/ui/Loading";
+import Badge from "@/components/atoms/Badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/atoms/Card";
+import Button from "@/components/atoms/Button";
 import Error from "@/components/ui/Error";
 import Empty from "@/components/ui/Empty";
-import { billService } from "@/services/api/billService";
-import { format, differenceInDays, isPast } from "date-fns";
-import { toast } from "react-toastify";
+import Loading from "@/components/ui/Loading";
 
 const Bills = () => {
   const [bills, setBills] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const loadBills = async () => {
+const loadBills = async () => {
     try {
       setError("");
       setLoading(true);
       const data = await billService.getAll();
-      // Sort by due date
-      const sortedData = data.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
+      // Sort by due date - update field name to match database
+      const sortedData = data.sort((a, b) => new Date(a.due_date) - new Date(b.due_date));
       setBills(sortedData);
     } catch (err) {
       setError("Failed to load bills");
@@ -46,11 +46,11 @@ const Bills = () => {
     }
   };
 
-  const getBillStatus = (bill) => {
+const getBillStatus = (bill) => {
     if (bill.paid) return { status: "paid", color: "success", icon: "CheckCircle" };
     
-    const daysUntilDue = differenceInDays(new Date(bill.dueDate), new Date());
-    const isOverdue = isPast(new Date(bill.dueDate));
+    const daysUntilDue = differenceInDays(new Date(bill.due_date), new Date());
+    const isOverdue = isPast(new Date(bill.due_date));
     
     if (isOverdue) return { status: "overdue", color: "error", icon: "AlertTriangle" };
     if (daysUntilDue <= 3) return { status: "due-soon", color: "warning", icon: "Clock" };
@@ -177,9 +177,9 @@ const Bills = () => {
         />
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {bills.map((bill, index) => {
+{bills.map((bill, index) => {
             const billStatus = getBillStatus(bill);
-            const daysUntilDue = differenceInDays(new Date(bill.dueDate), new Date());
+            const daysUntilDue = differenceInDays(new Date(bill.due_date), new Date());
             
             return (
               <motion.div
@@ -194,14 +194,14 @@ const Bills = () => {
                       <div className="flex items-center space-x-3">
                         <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center">
                           <ApperIcon 
-                            name={getBillIcon(bill.name)} 
+                            name={getBillIcon(bill.Name || bill.name)} 
                             className="h-6 w-6 text-slate-600"
                           />
                         </div>
                         <div>
-                          <h3 className="font-semibold text-slate-900">{bill.name}</h3>
+                          <h3 className="font-semibold text-slate-900">{bill.Name || bill.name}</h3>
                           <p className="text-sm text-slate-500">
-                            Due {format(new Date(bill.dueDate), "MMM dd, yyyy")}
+                            Due {format(new Date(bill.due_date), "MMM dd, yyyy")}
                           </p>
                         </div>
                       </div>
