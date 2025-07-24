@@ -75,61 +75,62 @@ const GoalCards = ({ limit = null }) => {
                     <CardContent>
                         <div className="flex flex-col items-center space-y-4">
                             {/* Progress Ring */}
-                            <ProgressRing progress={progress} size={120}>
+<ProgressRing progress={progress} size={120}>
                                 <div className="text-center">
                                     <div className="text-2xl font-bold gradient-text">
                                         {progress.toFixed(0)}%
-                                                              </div>
+                                    </div>
                                     <div className="text-xs text-slate-500">Complete</div>
                                 </div>
                             </ProgressRing>
+                            
                             {/* Amount Info */}
                             <div className="text-center w-full">
-                                <div className="flex justify-between items-center mb-2">
-                                    <div className="flex justify-between items-center mb-2">
+                                <div className="space-y-2 mb-4">
+                                    <div className="flex justify-between items-center">
                                         <span className="text-sm text-slate-500">Current</span>
-                                        <span className="font-semibold text-accent-600">${goal.current_amount.toLocaleString()}
-                                        </span>
+                                        <span className="font-semibold text-accent-600">${goal.current_amount.toLocaleString()}</span>
                                     </div>
-                                    <div className="flex justify-between items-center mb-2">
+                                    <div className="flex justify-between items-center">
                                         <span className="text-sm text-slate-500">Target</span>
-                                        <span className="font-semibold text-slate-900">${goal.target_amount.toLocaleString()}
-                                        </span>
+                                        <span className="font-semibold text-slate-900">${goal.target_amount.toLocaleString()}</span>
                                     </div>
                                     <div className="flex justify-between items-center">
                                         <span className="text-sm text-slate-500">Remaining</span>
-                                        <span className="font-semibold text-primary-600">${remaining.toLocaleString()}
-                                        </span>
-                                    </div>
-                                    {/* Time Info */}
-                                    <div className="w-full pt-4 border-t border-slate-200">
-                                        <div className="flex items-center justify-between">
-                                            <div className="flex items-center space-x-2">
-                                                <ApperIcon name="Calendar" className="h-4 w-4 text-slate-500" />
-                                                <span className="text-sm text-slate-500">Target Date</span>
-                                            </div>
-                                            <span className="text-sm font-medium text-slate-900">
-                                                {format(new Date(goal.target_date), "MMM dd, yyyy")}
-                                            </span>
-                                        </div>
-                                        <div className="flex items-center justify-between mt-2">
-                                            <div className="flex items-center space-x-2">
-                                                <ApperIcon name="Clock" className="h-4 w-4 text-slate-500" />
-                                                <span className="text-sm text-slate-500">Days Left</span>
-                                            </div>
-                                            <span
-                                                className={`text-sm font-medium ${daysLeft < 30 ? "text-orange-600" : "text-accent-600"}`}>
-                                                {daysLeft > 0 ? `${daysLeft} days` : "Overdue"}
-                                            </span>
-                                        </div>
+                                        <span className="font-semibold text-primary-600">${remaining.toLocaleString()}</span>
                                     </div>
                                 </div>
-                            </div></div></CardContent>
+                                
+                                {/* Time Info */}
+                                <div className="w-full pt-4 border-t border-slate-200">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center space-x-2">
+                                            <ApperIcon name="Calendar" className="h-4 w-4 text-slate-500" />
+                                            <span className="text-sm text-slate-500">Target Date</span>
+                                        </div>
+                                        <span className="text-sm font-medium text-slate-900">
+                                            {format(new Date(goal.target_date), "MMM dd, yyyy")}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center justify-between mt-2">
+                                        <div className="flex items-center space-x-2">
+                                            <ApperIcon name="Clock" className="h-4 w-4 text-slate-500" />
+                                            <span className="text-sm text-slate-500">Days Left</span>
+                                        </div>
+                                        <span
+                                            className={`text-sm font-medium ${daysLeft < 30 ? "text-orange-600" : "text-accent-600"}`}>
+                                            {daysLeft > 0 ? `${daysLeft} days` : "Overdue"}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+</div>
+                    </CardContent>
                 </Card>
             </motion.div>
         );
     })}
-</div>
+    </div>
   );
 };
 
