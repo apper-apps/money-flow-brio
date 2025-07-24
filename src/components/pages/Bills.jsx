@@ -10,12 +10,13 @@ import Button from "@/components/atoms/Button";
 import Error from "@/components/ui/Error";
 import Empty from "@/components/ui/Empty";
 import Loading from "@/components/ui/Loading";
+import AddBillModal from "@/components/organisms/AddBillModal";
 
 const Bills = () => {
   const [bills, setBills] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
+  const [isModalOpen, setIsModalOpen] = useState(false);
 const loadBills = async () => {
     try {
       setError("");
@@ -29,6 +30,10 @@ const loadBills = async () => {
     } finally {
       setLoading(false);
     }
+};
+
+  const handleModalSuccess = () => {
+    loadBills(); // Refresh bills list after creation
   };
 
   useEffect(() => {
@@ -84,7 +89,11 @@ const getBillStatus = (bill) => {
           <h1 className="text-3xl font-bold text-slate-900">Bills & Payments</h1>
           <p className="text-slate-600 mt-1">Keep track of your recurring bills and payments</p>
         </div>
-        <Button variant="primary" className="shadow-premium">
+<Button 
+          variant="primary" 
+          className="shadow-premium"
+          onClick={() => setIsModalOpen(true)}
+        >
           <ApperIcon name="Plus" className="h-4 w-4 mr-2" />
           Add Bill
         </Button>
@@ -251,8 +260,14 @@ const getBillStatus = (bill) => {
           })}
         </div>
       )}
+)}
+
+      {/* Add Bill Modal */}
+      <AddBillModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSuccess={handleModalSuccess}
+      />
     </div>
   );
 };
-
-export default Bills;
