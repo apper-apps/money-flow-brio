@@ -5,6 +5,7 @@ import { transactionService } from "@/services/api/transactionService";
 import ApperIcon from "@/components/ApperIcon";
 import TransactionList from "@/components/organisms/TransactionList";
 import AddTransactionModal from "@/components/organisms/AddTransactionModal";
+import ConnectBankModal from "@/components/organisms/ConnectBankModal";
 import Badge from "@/components/atoms/Badge";
 import Select from "@/components/atoms/Select";
 import Button from "@/components/atoms/Button";
@@ -13,11 +14,16 @@ import Error from "@/components/ui/Error";
 
 const Transactions = () => {
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showConnectModal, setShowConnectModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("all");
   const [refreshKey, setRefreshKey] = useState(0);
 
   const handleTransactionAdded = () => {
+    setRefreshKey(prev => prev + 1);
+  };
+
+  const handleBankConnected = () => {
     setRefreshKey(prev => prev + 1);
   };
 
@@ -29,7 +35,15 @@ const Transactions = () => {
           <h1 className="text-3xl font-bold text-slate-900">Transactions</h1>
           <p className="text-slate-600 mt-1">Track and manage all your financial transactions</p>
         </div>
-        <div className="flex flex-col sm:flex-row gap-3">
+<div className="flex flex-col sm:flex-row gap-3">
+          <Button
+            onClick={() => setShowConnectModal(true)}
+            variant="secondary"
+            className="shadow-premium"
+          >
+            <ApperIcon name="Building2" className="h-4 w-4 mr-2" />
+            Connect Bank
+          </Button>
           <Button
             onClick={() => setShowAddModal(true)}
             variant="primary"
@@ -40,8 +54,7 @@ const Transactions = () => {
           </Button>
         </div>
       </div>
-
-      {/* Filters */}
+{/* Filters */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -76,11 +89,18 @@ const Transactions = () => {
         <TransactionList showActions={true} />
       </motion.div>
 
-      {/* Add Transaction Modal */}
+{/* Add Transaction Modal */}
       <AddTransactionModal
         isOpen={showAddModal}
         onClose={() => setShowAddModal(false)}
         onSuccess={handleTransactionAdded}
+      />
+
+      {/* Connect Bank Modal */}
+      <ConnectBankModal
+        isOpen={showConnectModal}
+        onClose={() => setShowConnectModal(false)}
+        onSuccess={handleBankConnected}
       />
     </div>
   );
