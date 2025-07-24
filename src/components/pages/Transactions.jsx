@@ -1,15 +1,16 @@
-import React, { useState, useEffect, useCallback } from 'react'
-import { motion } from 'framer-motion'
-import { usePlaidLink } from 'react-plaid-link'
-import TransactionList from '@/components/organisms/TransactionList'
-import AddTransactionModal from '@/components/organisms/AddTransactionModal'
-import SearchBar from "@/components/molecules/SearchBar";
-import Button from "@/components/atoms/Button";
-import Select from "@/components/atoms/Select";
-import Badge from "@/components/atoms/Badge";
-import ApperIcon from "@/components/ApperIcon";
-import { transactionService } from "@/services/api/transactionService";
+import React, { useCallback, useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { usePlaidLink } from "react-plaid-link";
 import { toast } from "react-toastify";
+import { transactionService } from "@/services/api/transactionService";
+import ApperIcon from "@/components/ApperIcon";
+import TransactionList from "@/components/organisms/TransactionList";
+import AddTransactionModal from "@/components/organisms/AddTransactionModal";
+import Badge from "@/components/atoms/Badge";
+import Select from "@/components/atoms/Select";
+import Button from "@/components/atoms/Button";
+import SearchBar from "@/components/molecules/SearchBar";
+import Error from "@/components/ui/Error";
 
 const Transactions = () => {
   const [showAddModal, setShowAddModal] = useState(false);
@@ -41,45 +42,106 @@ const Transactions = () => {
     loadConnectedAccounts();
   }, []);
 
-  const onPlaidSuccess = useCallback(async (publicToken, metadata) => {
+const onPlaidSuccess = useCallback(async (publicToken, metadata) => {
     try {
       setLoading(prev => ({ ...prev, connecting: true }));
-      await transactionService.linkAccount(publicToken, metadata);
+      
+      // Validate connection data
+      if (!publicToken) {
+        throw new Error('Invalid connection token received from bank');
+      }
+      
+      if (!metadata?.institution?.name) {
+        throw new Error('Bank information missing from connection');
+      }
+      
+      const newAccount = await transactionService.linkAccount(publicToken, metadata);
+      if (!newAccount) {
+        throw new Error('Failed to save bank connection');
+      }
+      
       await loadConnectedAccounts();
-      toast.success(`Successfully connected ${metadata.institution?.name || 'bank account'}`);
+      toast.success(`Successfully connected ${metadata.institution.name}`, {
+        position: "top-right",
+        autoClose: 5000
+      });
       setRefreshKey(prev => prev + 1);
+      
     } catch (error) {
-      toast.error('Failed to connect bank account');
+      console.error('Bank connection failed:', error);
+      const errorMessage = error.message || 'Failed to connect bank account';
+      toast.error(`Connection failed: ${errorMessage}`, {
+        position: "top-right",
+        autoClose: 8000
+      });
     } finally {
       setLoading(prev => ({ ...prev, connecting: false }));
     }
   }, []);
 
-  const onPlaidExit = useCallback((error) => {
-    if (error) {
-      toast.error('Bank connection cancelled');
-    }
+  const onPlaidExit = useCallback((error, metadata) => {
     setLoading(prev => ({ ...prev, connecting: false }));
+    
+    if (error) {
+      console.error('Plaid Link exit with error:', error);
+      
+      // Handle specific error types
+      if (error.error_code === 'INSTITUTION_DOWN') {
+        toast.error('Your bank is temporarily unavailable. Please try again later.');
+      } else if (error.error_code === 'INSTITUTION_NOT_RESPONDING') {
+        toast.error('Connection timeout. Please check your internet and try again.');
+      } else if (error.error_code === 'INVALID_CREDENTIALS') {
+        toast.error('Invalid login credentials. Please verify your bank login details.');
+      } else if (error.error_code === 'ITEM_LOCKED') {
+        toast.error('Your bank account is locked. Please contact your bank.');
+      } else if (metadata?.status === 'requires_questions') {
+        toast.info('Additional verification required by your bank.');
+      } else {
+        toast.error('Bank connection was cancelled or failed. Please try again.');
+      }
+    }
   }, []);
 
-const { open: openPlaidLink, ready } = usePlaidLink({
-    token: 'mock_link_token', // Mock token for demo - in production, get link_token from your backend
+  const { open: openPlaidLink, ready } = usePlaidLink({
+    token: 'mock_link_token', // In production, get link_token from your backend
     onSuccess: onPlaidSuccess,
     onExit: onPlaidExit,
-    env: 'sandbox', // Use 'production' in production
+    env: import.meta.env.VITE_PLAID_ENV || 'sandbox',
     product: ['transactions'],
-    clientName: 'Money Flow App'
+    clientName: 'Money Flow App',
+    countryCodes: ['US'], // Specify supported countries
+    language: 'en'
   });
 
   const handleConnectBank = async () => {
     try {
       setLoading(prev => ({ ...prev, connecting: true }));
+      
+      // Initialize Plaid with enhanced error handling
       await transactionService.initializePlaid();
-      // In a real implementation, you'd create a link_token from your backend here
-      openPlaidLink();
+      
+      // Show security message before opening Plaid Link
+      toast.info(
+        'You will be redirected to securely connect your bank account. Your credentials are never stored by our app.', 
+        { autoClose: 3000 }
+      );
+      
+      // Small delay to let user read the security message
+      setTimeout(() => {
+        if (ready) {
+          openPlaidLink();
+        } else {
+          throw new Error('Bank connection service not ready. Please refresh and try again.');
+        }
+      }, 500);
+      
     } catch (error) {
       console.error('Failed to initialize bank connection:', error);
-      toast.error('Failed to initialize bank connection');
+      const errorMessage = error.message || 'Failed to initialize bank connection';
+      toast.error(`Connection error: ${errorMessage}`, {
+        position: "top-right",
+        autoClose: 8000
+      });
       setLoading(prev => ({ ...prev, connecting: false }));
     }
   };
@@ -94,15 +156,33 @@ const { open: openPlaidLink, ready } = usePlaidLink({
       const result = await transactionService.syncTransactions(account.Id);
       
       if (result.imported > 0) {
-        toast.success(`Imported ${result.imported} new transactions`);
+        toast.success(
+          `Successfully imported ${result.imported} new transactions from ${result.accountName || account.institution_name}`,
+          { autoClose: 6000 }
+        );
         setRefreshKey(prev => prev + 1);
       } else {
-        toast.info('No new transactions to import');
+        toast.info(
+          `No new transactions found in ${result.accountName || account.institution_name}`,
+          { autoClose: 4000 }
+        );
+      }
+      
+      if (result.duplicatesSkipped > 0) {
+        toast.info(
+          `Skipped ${result.duplicatesSkipped} duplicate transactions`,
+          { autoClose: 3000 }
+        );
       }
       
       await loadConnectedAccounts();
     } catch (error) {
-      toast.error('Failed to sync transactions');
+      console.error('Transaction sync failed:', error);
+      const errorMessage = error.message || 'Failed to sync transactions';
+      toast.error(`Sync failed: ${errorMessage}`, {
+        position: "top-right",
+        autoClose: 8000
+      });
     } finally {
       setLoading(prev => ({ 
         ...prev, 
@@ -112,7 +192,11 @@ const { open: openPlaidLink, ready } = usePlaidLink({
   };
 
   const handleDisconnectAccount = async (account) => {
-    if (!confirm(`Disconnect ${account.institutionName}?`)) return;
+    const institutionName = account.institution_name || 'this account';
+    
+    if (!confirm(`Are you sure you want to disconnect ${institutionName}? This will stop automatic transaction imports.`)) {
+      return;
+    }
     
     try {
       setLoading(prev => ({ 
@@ -122,9 +206,19 @@ const { open: openPlaidLink, ready } = usePlaidLink({
       
       await transactionService.disconnectAccount(account.Id);
       await loadConnectedAccounts();
-      toast.success(`Disconnected ${account.institutionName}`);
+      
+      toast.success(`Successfully disconnected ${institutionName}`, {
+        position: "top-right",
+        autoClose: 5000
+      });
+      
     } catch (error) {
-      toast.error('Failed to disconnect account');
+      console.error('Account disconnection failed:', error);
+      const errorMessage = error.message || 'Failed to disconnect account';
+      toast.error(`Disconnect failed: ${errorMessage}`, {
+        position: "top-right",
+        autoClose: 8000
+      });
     } finally {
       setLoading(prev => ({ 
         ...prev, 
@@ -189,7 +283,7 @@ return (
           
           {showAccounts && (
             <div className="p-4 space-y-3">
-              {connectedAccounts.map((account) => (
+{connectedAccounts.map((account) => (
                 <div 
                   key={account.Id}
                   className="flex items-center justify-between p-3 bg-slate-50 rounded-lg"
@@ -197,15 +291,15 @@ return (
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
                       <span className="font-medium text-slate-900">
-                        {account.institutionName}
+                        {account.institution_name}
                       </span>
                       <Badge variant="secondary" className="text-xs">
-                        {account.accountName}
+                        {account.account_name}
                       </Badge>
                     </div>
                     <p className="text-sm text-slate-600 mt-1">
-                      {account.lastSync 
-                        ? `Last synced: ${new Date(account.lastSync).toLocaleString()}`
+                      {account.last_sync 
+                        ? `Last synced: ${new Date(account.last_sync).toLocaleString()}`
                         : 'Never synced'
                       }
                     </p>
