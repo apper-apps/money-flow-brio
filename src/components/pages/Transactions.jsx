@@ -79,11 +79,11 @@ const onPlaidSuccess = useCallback(async (publicToken, metadata) => {
     }
   }, []);
 
-  const onPlaidExit = useCallback((error, metadata) => {
+const onPlaidExit = useCallback((error, metadata) => {
     setLoading(prev => ({ ...prev, connecting: false }));
     
     if (error) {
-      console.error('Plaid Link exit with error:', error);
+      console.error('Plaid Link exit with error:', JSON.stringify(error, null, 2));
       
       // Handle specific error types
       if (error.error_code === 'INSTITUTION_DOWN') {
