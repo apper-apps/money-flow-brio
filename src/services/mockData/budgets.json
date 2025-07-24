@@ -1,0 +1,44 @@
+[
+  {
+    "Id": 1,
+    "category": "Food",
+    "limit": 600,
+    "period": "monthly",
+    "spent": 0
+  },
+  {
+    "Id": 2,
+    "category": "Transport",
+    "limit": 300,
+    "period": "monthly",
+    "spent": 0
+  },
+  {
+    "Id": 3,
+    "category": "Entertainment",
+    "limit": 200,
+    "period": "monthly",
+    "spent": 0
+  },
+  {
+    "Id": 4,
+    "category": "Shopping",
+    "limit": 400,
+    "period": "monthly",
+    "spent": 0
+  },
+  {
+    "Id": 5,
+    "category": "Bills",
+    "limit": 1200,
+    "period": "monthly",
+    "spent": 0
+  },
+  {
+    "Id": 6,
+    "category": "Health",
+    "limit": 250,
+    "period": "monthly",
+    "spent": 0
+  }
+]

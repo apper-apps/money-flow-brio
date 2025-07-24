@@ -1,0 +1,110 @@
+[
+  {
+    "Id": 1,
+    "amount": 5000,
+    "type": "income",
+    "category": "Salary",
+    "description": "Monthly salary deposit",
+    "date": "2024-01-15",
+    "recurring": true
+  },
+  {
+    "Id": 2,
+    "amount": 850,
+    "type": "expense",
+    "category": "Bills",
+    "description": "Monthly rent payment",
+    "date": "2024-01-01",
+    "recurring": true
+  },
+  {
+    "Id": 3,
+    "amount": 150,
+    "type": "expense",
+    "category": "Food",
+    "description": "Grocery shopping at Whole Foods",
+    "date": "2024-01-10",
+    "recurring": false
+  },
+  {
+    "Id": 4,
+    "amount": 45,
+    "type": "expense",
+    "category": "Transport",
+    "description": "Gas station fill-up",
+    "date": "2024-01-08",
+    "recurring": false
+  },
+  {
+    "Id": 5,
+    "amount": 1500,
+    "type": "income",
+    "category": "Freelance",
+    "description": "Web development project",
+    "date": "2024-01-20",
+    "recurring": false
+  },
+  {
+    "Id": 6,
+    "amount": 120,
+    "type": "expense",
+    "category": "Entertainment",
+    "description": "Movie night and dinner",
+    "date": "2024-01-12",
+    "recurring": false
+  },
+  {
+    "Id": 7,
+    "amount": 80,
+    "type": "expense",
+    "category": "Shopping",
+    "description": "New workout clothes",
+    "date": "2024-01-18",
+    "recurring": false
+  },
+  {
+    "Id": 8,
+    "amount": 200,
+    "type": "expense",
+    "category": "Health",
+    "description": "Doctor visit and medication",
+    "date": "2024-01-22",
+    "recurring": false
+  },
+  {
+    "Id": 9,
+    "amount": 750,
+    "type": "income",
+    "category": "Investment",
+    "description": "Dividend payment",
+    "date": "2024-01-25",
+    "recurring": false
+  },
+  {
+    "Id": 10,
+    "amount": 95,
+    "type": "expense",
+    "category": "Bills",
+    "description": "Internet and phone bill",
+    "date": "2024-01-05",
+    "recurring": true
+  },
+  {
+    "Id": 11,
+    "amount": 65,
+    "type": "expense",
+    "category": "Food",
+    "description": "Lunch with colleagues",
+    "date": "2024-01-28",
+    "recurring": false
+  },
+  {
+    "Id": 12,
+    "amount": 180,
+    "type": "expense",
+    "category": "Transport",
+    "description": "Car maintenance service",
+    "date": "2024-01-30",
+    "recurring": false
+  }
+]
