@@ -9,7 +9,7 @@ import Error from "@/components/ui/Error";
 import Empty from "@/components/ui/Empty";
 import Loading from "@/components/ui/Loading";
 
-const GoalCards = ({ limit = null }) => {
+const GoalCards = ({ limit = null, onEditGoal }) => {
   const [goals, setGoals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -72,10 +72,10 @@ const GoalCards = ({ limit = null }) => {
                             <ApperIcon name="Target" className="h-5 w-5 text-primary-500" />
                         </CardTitle>
                     </CardHeader>
-                    <CardContent>
+<CardContent>
                         <div className="flex flex-col items-center space-y-4">
                             {/* Progress Ring */}
-<ProgressRing progress={progress} size={120}>
+                            <ProgressRing progress={progress} size={120}>
                                 <div className="text-center">
                                     <div className="text-2xl font-bold gradient-text">
                                         {progress.toFixed(0)}%
@@ -123,8 +123,21 @@ const GoalCards = ({ limit = null }) => {
                                         </span>
                                     </div>
                                 </div>
+
+                                {/* Edit Button */}
+                                {onEditGoal && (
+                                    <div className="w-full pt-4 border-t border-slate-200 mt-4">
+                                        <button
+                                            onClick={() => onEditGoal(goal)}
+                                            className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-primary-600 bg-primary-50 hover:bg-primary-100 rounded-lg transition-colors"
+                                        >
+                                            <ApperIcon name="Edit" className="h-4 w-4" />
+                                            Edit Goal
+                                        </button>
+                                    </div>
+                                )}
                             </div>
-</div>
+                        </div>
                     </CardContent>
                 </Card>
             </motion.div>

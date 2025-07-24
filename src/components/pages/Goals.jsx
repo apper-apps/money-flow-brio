@@ -4,9 +4,12 @@ import GoalCards from "@/components/organisms/GoalCards";
 import Button from "@/components/atoms/Button";
 import ApperIcon from "@/components/ApperIcon";
 import AddGoalModal from "@/components/organisms/AddGoalModal";
+import EditGoalModal from "@/components/organisms/EditGoalModal";
 
 const Goals = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingGoal, setEditingGoal] = useState(null);
 
   const handleCreateGoal = () => {
     setIsModalOpen(true);
@@ -16,9 +19,24 @@ const Goals = () => {
     setIsModalOpen(false);
   };
 
+  const handleEditGoal = (goal) => {
+    setEditingGoal(goal);
+    setIsEditModalOpen(true);
+  };
+
+  const handleEditModalClose = () => {
+    setIsEditModalOpen(false);
+    setEditingGoal(null);
+  };
+
   const handleGoalCreated = (newGoal) => {
     // Modal will close automatically, GoalCards will refresh on next render
     console.log('Goal created:', newGoal);
+  };
+
+  const handleGoalUpdated = (updatedGoal) => {
+    // Modal will close automatically, GoalCards will refresh on next render
+    console.log('Goal updated:', updatedGoal);
   };
 
   return (
@@ -79,12 +97,12 @@ const Goals = () => {
       </motion.div>
 
       {/* Goal Cards */}
-      <motion.div
+<motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
       >
-        <GoalCards />
+        <GoalCards onEditGoal={handleEditGoal} />
       </motion.div>
 
       {/* Add Goal Modal */}
@@ -92,6 +110,14 @@ const Goals = () => {
         isOpen={isModalOpen}
         onClose={handleModalClose}
         onSuccess={handleGoalCreated}
+      />
+
+      {/* Edit Goal Modal */}
+      <EditGoalModal
+        isOpen={isEditModalOpen}
+        onClose={handleEditModalClose}
+        onSuccess={handleGoalUpdated}
+        goal={editingGoal}
       />
     </div>
   );
