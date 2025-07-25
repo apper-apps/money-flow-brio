@@ -11,6 +11,7 @@ import Transactions from "@/components/pages/Transactions";
 import Budgets from "@/components/pages/Budgets";
 import Bills from "@/components/pages/Bills";
 import Goals from "@/components/pages/Goals";
+import Reports from "@/components/pages/Reports";
 import Login from '@/components/pages/Login';
 import Signup from '@/components/pages/Signup';
 import Callback from '@/components/pages/Callback';
@@ -163,7 +164,8 @@ function AppContent() {
                   <Route path="/transactions" element={<Transactions />} />
                   <Route path="/budgets" element={<Budgets />} />
                   <Route path="/bills" element={<Bills />} />
-                  <Route path="/goals" element={<Goals />} />
+<Route path="/goals" element={<Goals />} />
+                  <Route path="/reports" element={<Reports />} />
                 </Routes>
               </main>
             </div>
